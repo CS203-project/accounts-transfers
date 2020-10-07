@@ -21,6 +21,7 @@
 #### POST /accounts/{account_id}/transactions
 ```
 // ROLE_USER - make transfers
+
 {
   "from": 12345,
   "to": 12346,
@@ -30,6 +31,7 @@
 #### GET /accounts
 ```
 // ROLE_USER - view own accounts
+
 {
   {
     "id": 1,
