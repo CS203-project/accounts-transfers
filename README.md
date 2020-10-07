@@ -10,7 +10,8 @@
 #### POST /accounts
 ```
 // HEADER Authentication: "Basic <token>"
-// Only ROLE_MANAGER can create account
+// ROLE_MANAGER - create account
+
 {
   "customer_id": 1234,
   "balance": 50000.0,
@@ -19,7 +20,7 @@
 ```
 #### POST /accounts/{account_id}/transactions
 ```
-// ROLE_USER can make transfers
+// ROLE_USER - make transfers
 {
   "from": 12345,
   "to": 12346,
@@ -28,7 +29,7 @@
 ```
 #### GET /accounts
 ```
-// ROLE_USER can view own accounts
+// ROLE_USER - view own accounts
 {
   {
     "id": 1,
