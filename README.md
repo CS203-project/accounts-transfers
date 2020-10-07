@@ -2,10 +2,10 @@
 
 ### API Documentation
 * [POST /accounts](https://github.com/CS203-project/accounts-transfers#post-accounts)
-* [POST /accounts/{account_id}/transactions](https://github.com/CS203-project/accounts-transfers#post-transfers)
+* [POST /accounts/{account_id}/transactions](https://github.com/CS203-project/accounts-transfers#post-accountsaccount_idtransactions)
 * [GET /accounts](https://github.com/CS203-project/accounts-transfers#get-accounts)
-* [GET /accounts/{account_id}](https://github.com/CS203-project/accounts-transfers#get-accountsbyID)
-* [GET /accounts/{account_id}/transactions](https://github.com/CS203-project/accounts-transfers#get-transfers)
+* [GET /accounts/{account_id}](https://github.com/CS203-project/accounts-transfers#get-accountsaccount_id)
+* [GET /accounts/{account_id}/transactions](https://github.com/CS203-project/accounts-transfers#get-accountsaccount_idtransactions)
 
 #### POST /accounts
 ```
