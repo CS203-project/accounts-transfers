@@ -17,6 +17,18 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
+
 import org.springframework.beans.factory.annotation.Autowired;   
 
 import java.util.*;
@@ -26,17 +38,100 @@ import java.lang.IllegalArgumentException;
 public class AccountsController {
     @Autowired
     private AccountsRepository accRepository;
+    
+    private JSONObject userObj;
 
     public AccountsController() {}
 
+    public void getCredentials(String jwt) {
+        String output = "";
+        try {
+            URL url = new URL("http://13.212.86.115/api/customers/verification");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authentication", jwt);
+
+            if (conn.getResponseCode() != 200) throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            // System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                setUserObj(output);
+            }
+
+            conn.disconnect();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setUserObj(String userJSON) {
+        JSONParser parser = new JSONParser();
+        JSONObject userObj = new JSONObject();
+        try {
+            Object obj  = parser.parse(userJSON);
+            JSONArray array = new JSONArray();
+            array.add(obj);
+
+            userObj = (JSONObject)array.get(0);
+
+            this.userObj = userObj;
+
+        } catch(ParseException pe) {
+		
+            System.out.println("position: " + pe.getPosition());
+            System.out.println(pe);
+        } catch (NullPointerException npe) {
+
+            System.out.println("No user found.");
+        }
+    }
+
     @PostMapping(path="/accounts")
-    public @ResponseBody String addAccount (@RequestBody Account account) {
-        // in account object, there is customer_id
-        // find role from customer_id from userDB or from Account.java
-        // if the role is manager, allow creation of account
-        // if not, return exception
-        accRepository.save(account);
-        return "Saved new account";
+    public @ResponseBody String addAccount (@RequestBody Account account, @RequestHeader("Authentication") String AuthHeader) {
+
+        // issue: how will the manager input customer id of the client?
+
+        // Authenticate
+        getCredentials(AuthHeader);
+
+        // Verify role
+        if (this.userObj != null) {
+            String role = (String)(this.userObj.get("authorities"));
+            if (role.compareTo("ROLE_MANAGER") == 0) {
+
+                // create new account
+                accRepository.save(account);
+                return "New account created";
+            }
+        }
+        
+        return "Manager privileges required to create a new Ryverbank account.";
+    }
+
+    @GetMapping(path="/accounts")
+    public @ResponseBody Iterable<Account> getAccounts(@RequestHeader("Authentication") String AuthHeader) {
+
+        Iterable<Account> accounts = accRepository.findAll();
+        Iterator<Account> iter = accounts.iterator();
+        getCredentials(AuthHeader);
+
+        if (this.userObj != null) {
+            long userLong = (long)this.userObj.get("id");
+            int userID = Math.toIntExact(userLong);
+
+            while(iter.hasNext()) {
+                Account acc = iter.next();
+                if(acc.getCustomer_id() != userID) {
+                    iter.remove();
+                }
+            }
+        }
+        return accounts;
     }
 
     
