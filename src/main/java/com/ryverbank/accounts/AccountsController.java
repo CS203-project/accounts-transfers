@@ -92,6 +92,16 @@ public class AccountsController {
         }
     }
 
+    public int getUID(String AuthHeader) {
+        getCredentials(AuthHeader);
+        if (this.userObj != null) {
+            long userLong = (long)this.userObj.get("id");
+            int userID = Math.toIntExact(userLong);
+            return userID;
+        }
+        return 0;
+    }
+
     @PostMapping(path="/accounts")
     public @ResponseBody String addAccount (@RequestBody Account account, @RequestHeader("Authentication") String AuthHeader) {
 
@@ -119,31 +129,48 @@ public class AccountsController {
 
         Iterable<Account> accounts = accRepository.findAll();
         Iterator<Account> iter = accounts.iterator();
-        getCredentials(AuthHeader);
 
-        if (this.userObj != null) {
-            long userLong = (long)this.userObj.get("id");
-            int userID = Math.toIntExact(userLong);
-
-            while(iter.hasNext()) {
-                Account acc = iter.next();
-                if(acc.getCustomer_id() != userID) {
-                    iter.remove();
-                }
+        int userID = getUID(AuthHeader);
+        while(iter.hasNext()) {
+            Account acc = iter.next();
+            if(acc.getCustomer_id() != userID) {
+                iter.remove();
             }
         }
+
+        // getCredentials(AuthHeader);
+
+        // if (this.userObj != null) {
+        //     long userLong = (long)this.userObj.get("id");
+        //     int userID = Math.toIntExact(userLong);
+
+        //     while(iter.hasNext()) {
+        //         Account acc = iter.next();
+        //         if(acc.getCustomer_id() != userID) {
+        //             iter.remove();
+        //         }
+        //     }
+        // }
         return accounts;
     }
 
     @GetMapping(path="/accounts/{id}")
     public @ResponseBody Account getAccountsById(@RequestHeader("Authentication") String AuthHeader, @PathVariable int id) {
 
-        // todo: check that this user is only viewing accounts that match their ID
-        // if they input account id that does not have customer_id == userID
-        // will show AccountNotFoundException for this user
+        int userID = getUID(AuthHeader);
+
         Optional<Account> accountEntity = accRepository.findById(id);
-        if (!accountEntity.isPresent()) throw new AccountNotFoundException(id);
-        Account account = accountEntity.get();
+        Account account;
+        if (!accountEntity.isPresent()) {
+            throw new AccountNotFoundException(id);
+        } else {
+            account = accountEntity.get();
+            if (account.getCustomer_id() != userID) {
+                System.out.println("No account of this ID associated with this user.");
+                throw new AccountNotFoundException(id);
+            }
+        }
+        
         return account;
     }
 }
