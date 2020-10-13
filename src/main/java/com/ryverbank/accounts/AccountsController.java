@@ -131,26 +131,14 @@ public class AccountsController {
         Iterator<Account> iter = accounts.iterator();
 
         int userID = getUID(AuthHeader);
+        // int userID = 123456;
+
         while(iter.hasNext()) {
             Account acc = iter.next();
             if(acc.getCustomer_id() != userID) {
                 iter.remove();
             }
         }
-
-        // getCredentials(AuthHeader);
-
-        // if (this.userObj != null) {
-        //     long userLong = (long)this.userObj.get("id");
-        //     int userID = Math.toIntExact(userLong);
-
-        //     while(iter.hasNext()) {
-        //         Account acc = iter.next();
-        //         if(acc.getCustomer_id() != userID) {
-        //             iter.remove();
-        //         }
-        //     }
-        // }
         return accounts;
     }
 
@@ -158,6 +146,7 @@ public class AccountsController {
     public @ResponseBody Account getAccountsById(@RequestHeader("Authentication") String AuthHeader, @PathVariable int id) {
 
         int userID = getUID(AuthHeader);
+        // int userID = 123456;
 
         Optional<Account> accountEntity = accRepository.findById(id);
         Account account;
@@ -173,4 +162,6 @@ public class AccountsController {
         
         return account;
     }
+
+
 }
