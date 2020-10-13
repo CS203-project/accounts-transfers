@@ -24,6 +24,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+// JSON imports
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
@@ -134,5 +135,15 @@ public class AccountsController {
         return accounts;
     }
 
-    
+    @GetMapping(path="/accounts/{id}")
+    public @ResponseBody Account getAccountsById(@RequestHeader("Authentication") String AuthHeader, @PathVariable int id) {
+
+        // todo: check that this user is only viewing accounts that match their ID
+        // if they input account id that does not have customer_id == userID
+        // will show AccountNotFoundException for this user
+        Optional<Account> accountEntity = accRepository.findById(id);
+        if (!accountEntity.isPresent()) throw new AccountNotFoundException(id);
+        Account account = accountEntity.get();
+        return account;
+    }
 }
