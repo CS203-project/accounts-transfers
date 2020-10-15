@@ -105,8 +105,6 @@ public class AccountsController {
     @PostMapping(path="/accounts")
     public @ResponseBody String addAccount (@RequestBody Account account, @RequestHeader("Authentication") String AuthHeader) {
 
-        // issue: how will the manager input customer id of the client?
-
         // Authenticate
         getCredentials(AuthHeader);
 
@@ -143,7 +141,7 @@ public class AccountsController {
     }
 
     @GetMapping(path="/accounts/{id}")
-    public @ResponseBody Account getAccountsById(@RequestHeader("Authentication") String AuthHeader, @PathVariable int id) {
+    public @ResponseBody Account getAccountById(@RequestHeader("Authentication") String AuthHeader, @PathVariable int id) {
 
         int userID = getUID(AuthHeader);
         // int userID = 123456;
@@ -162,6 +160,5 @@ public class AccountsController {
         
         return account;
     }
-
 
 }
